@@ -156,6 +156,11 @@
 		"total_sell_count": {
 			"bsonType": "int",
 			"description": "总销量"
+		},
+		"imageFile_list": {
+			"title": "图片链接列表",
+			"bsonType": "string",
+			"description": "图片链接列表"
 		}
 	},
 	"required": ["goods_sn", "name", "remain_count", "month_sell_count", "total_sell_count", "comment_count", "is_real",

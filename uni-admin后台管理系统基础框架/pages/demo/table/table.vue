@@ -28,7 +28,7 @@
 					<uni-th width="80" align="center">在售状态</uni-th>
 					<uni-th width="80" align="center">销售人员</uni-th>
 					<uni-th width="60" align="center">首页图片</uni-th>
-					<uni-th align="center">设置</uni-th>
+					<uni-th width="120" align="center">操作</uni-th>
 				</uni-tr>
 				<uni-tr v-for="(item ,index) in tableData" :key="index">
 					<!-- 表格数据列 -->
@@ -45,15 +45,13 @@
 					<uni-td>{{item.shop_name}}</uni-td>
 					<uni-td>
 						<view class="uni-thumb shop-picture shop-picture-column">
-							<image :src="item.goods_thumb" mode="aspectFill" @click.stop="prviewImage(item.goods_thumb)"></image>
+							<image :src="item.goods_thumb"  mode="aspectFill" @click.stop="prviewImage(item.goods_thumb)"></image>
 						</view>
 					</uni-td>
 					<uni-td>
 						<view class="uni-group">
-							<!-- 编辑按钮 -->
-							<button class="uni-button" size="mini" type="primary">{{$t('common.button.edit')}}</button>
 							<!-- 删除按钮 -->
-							<button class="uni-button" size="mini" type="warn">{{$t('common.button.delete')}}</button>
+							<button class="uni-button" size="mini" type="warn" @click="deleteItem(item._id)">{{$t('common.button.delete')}}</button>
 						</view>
 					</uni-td>
 				</uni-tr>
@@ -130,6 +128,66 @@ import tableData from './tableData'
 			// 批量删除函数
 			delTable() {
 				this.selectedItems();
+			},
+			deleteItem(_id) {
+				this.deleteGoodsData({
+					_id: _id,
+					success: (res) => {
+						uni.showToast({
+							title: '删除成功'
+						})
+					    this.tableData = this.tableData.filter(item => item._id !== _id);
+					},
+					fail: (res) => {
+						uni.showToast({
+							title: res.result['message'] || '删除失败',
+							icon: 'error'
+						})
+					}
+				})
+			},
+			// 添加保存数据的方法
+			async deleteGoodsData(options) {
+				const {
+					success,
+					fail,
+					_id
+				} = options
+				try {
+					// 准备要保存的数据对象
+					const goodsData = {
+						_id: options._id
+					}
+					console.log(goodsData)
+			
+					// 调用云函数保存数据
+					const result = await uniCloud.callFunction({
+						name: 'deleteGoodsData',
+						data: {
+							action: 'delete',
+							tableName: 'opendb-mall-goods',
+							data: goodsData
+						}
+					})
+					console.log(result)
+					console.log(result.header["x-serverless-http-status"])
+					console.log(result.result["code"])
+					console.log(result["success"])
+					console.log(result.result["message"])
+				
+					if (result.success && !result.result["code"] && result.header["x-serverless-http-status"] == '200') {			
+						setTimeout(() => {
+							console.log('delete success')
+							success(result)
+							typeof success === 'function' && success(result)
+						}, 500) 
+			
+					} else {
+						typeof fail === 'function' && fail(result)
+					}
+				} catch (e) {
+					typeof fail === 'function' && fail(result)
+				}
 			},
 
 			// 分页触发事件处理函数

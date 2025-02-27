@@ -60,7 +60,7 @@
 			</uni-card>
 			<uni-section title="只选择图片" type="line" style="padding-bottom: 5px;">
 				<view class="example-body" style="width: 400px;height: 450px;">
-					<uni-file-picker  ref="files" limit="9" 
+					<uni-file-picker  ref="files" limit="12" 
 					title="最多选择9张图片" 
 					:auto-upload="false"
 					@select="select" 
@@ -128,7 +128,7 @@
 					"goods_bianSuXiang": "123",
 					"goods_quDongFangShi": "123"
 				},
-				tempFiles: [],
+				imageFile_list: [],
 				
 				rules: {
 					...getValidator(["username", "password", "role", "mobile", "email"]),
@@ -168,11 +168,11 @@
 		},
 		methods: {
 			/**
-			 * 跳转应用管理的 list 页
+			 * 跳转应用管理的 table 页
 			 */
 			gotoAppList() {
 				uni.navigateTo({
-					url: '../app/list'
+					url: './table'
 				})
 			},
 			gotoTagList() {
@@ -270,7 +270,7 @@
 					})
 					return;
 				}
-				if (this.tempFiles.length===0) {
+				if (this.imageFile_list.length===0) {
 					uni.showModal({
 						content: '车辆图片必须上传',
 						showCancel: false
@@ -296,9 +296,11 @@
 						// 返回上一页并刷新列表
 						uni.showToast({
 							title: '新增成功'
-						})						
-						this.getOpenerEventChannel().emit('refreshData')
-						setTimeout(() => uni.navigateBack(), 500)					
+						})
+						this.gotoAppList()
+						/* this.getOpenerEventChannel().emit('refreshData')
+						setTimeout(() => uni.navigateBack(), 500)	 
+						*/				
 					},
 					fail: (res) => {
 						uni.showToast({
@@ -321,7 +323,7 @@
 			// 上传成功
 			success(e){			
 				for (let i = 0; i < e.tempFiles.length; i++) {
-					this.tempFiles.push(e.tempFiles[i])
+					this.imageFile_list.push(e.tempFiles[i])
 				}
 				uni.showModal({
 					content: '上传图片成功',
@@ -336,8 +338,8 @@
 					showCancel: false
 				});
 			},
+			
 			// 添加保存数据的方法
-
 			async saveGoodsData(options) {
 				const {
 					success,
@@ -353,9 +355,12 @@
 						goods_alreadKilometer: this.formData.goods_alreadKilometer,
 						status: 1, // 1表示在售
 						shop_name: this.formData.shop_name,
-						goods_thumb: this.tempFiles[0]?.url || '',
-						create_date: Date.now()
+						goods_thumb: this.imageFile_list[0]?.url || '',
+						create_date: Date.now(),
+						imageFile_list: JSON.stringify(this.imageFile_list)
+						
 					}
+					console.log(goodsData)
 
 					// 调用云函数保存数据
 					const result = await uniCloud.callFunction({
