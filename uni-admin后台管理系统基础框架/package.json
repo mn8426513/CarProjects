@@ -46,7 +46,9 @@
 		"type": "unicloud-template-project"
 	},
 	"uni_modules": {
-		"dependencies": [],
+		"dependencies": [
+			
+		],
 		"encrypt": [],
 		"platforms": {
 			"cloud": {

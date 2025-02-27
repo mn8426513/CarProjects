@@ -285,6 +285,17 @@
 			]
 		},
 		{
+			"root": "pages/demo",
+			"pages": [{
+					"path": "table/add",
+					"style": {
+						"navigationBarTitleText": "新增车辆",
+						"navigationStyle": "default"
+					}
+				}
+			]
+		},
+		{
 			"root": "pages/uni-stat",
 			"pages": [{
 					"path": "page-res/page-res",

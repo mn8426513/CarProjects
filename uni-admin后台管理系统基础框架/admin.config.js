@@ -42,20 +42,22 @@ export default {
 		// 配置静态菜单列表（放置在用户被授权的菜单列表下边）
 		staticMenu: [{
 			menu_id: "demo",
-			text: '静态功能演示',
+			text: '汽车上架下架',
 			icon: 'admin-icons-kaifashili',
 			url: "",
-			children: [{
+			children: 
+				[
+				{
+					menu_id: "table",
+					text: '汽车列表',
+					icon: 'admin-icons-table',
+					value: '/pages/demo/table/table',
+				}, {
 				menu_id: "icons",
 				text: '图标',
 				icon: 'admin-icons-icon',
 				value: '/pages/demo/icons/icons',
-			}, {
-				menu_id: "table",
-				text: '表格',
-				icon: 'admin-icons-table',
-				value: '/pages/demo/table/table',
-			}]
+				}]
 		}, {
 			menu_id: "admim-doc-pulgin",
 			text: '文档与插件',

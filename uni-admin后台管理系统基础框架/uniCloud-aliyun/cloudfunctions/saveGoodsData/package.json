@@ -1,0 +1,7 @@
+{
+  "name": "saveGoodsData",
+  "dependencies": {},
+  "extensions": {
+    "uni-cloud-jql": {}
+  }
+}

@@ -10,7 +10,7 @@
 				<!-- 搜索按钮 -->
 				<button class="uni-button" type="default" size="mini" @click="search">{{$t('common.button.search')}}</button>
 				<!-- 添加按钮 -->
-				<button class="uni-button" type="primary" size="mini">{{$t('common.button.add')}}</button>
+				<button class="uni-button" type="primary" size="mini" @click="navigateTo('./add')">{{$t('common.button.add')}}</button>
 				<!-- 批量删除按钮 -->
 				<button class="uni-button" type="warn" size="mini" @click="delTable">{{$t('common.button.batchDelete')}}</button>
 			</view>
@@ -20,18 +20,34 @@
 			<uni-table :loading="loading" border stripe type="selection" :emptyText="$t('common.empty')" @selection-change="selectionChange">
 				<uni-tr>
 					<!-- 表头列 -->
-					<uni-th width="150" align="center">日期</uni-th>
-					<uni-th width="150" align="center">姓名</uni-th>
-					<uni-th align="center">地址</uni-th>
-					<uni-th width="204" align="center">设置</uni-th>
+					<uni-th width="100" align="center">上架日期</uni-th>
+					<uni-th width="100" align="center">名称</uni-th>
+					<uni-th width="100" align="center">品牌</uni-th>
+					<uni-th width="100" align="center">年份</uni-th>
+					<uni-th width="80" align="center">公里数</uni-th>
+					<uni-th width="80" align="center">在售状态</uni-th>
+					<uni-th width="80" align="center">销售人员</uni-th>
+					<uni-th width="60" align="center">首页图片</uni-th>
+					<uni-th align="center">设置</uni-th>
 				</uni-tr>
 				<uni-tr v-for="(item ,index) in tableData" :key="index">
 					<!-- 表格数据列 -->
-					<uni-td>{{item.date}}</uni-td>
+					<uni-td>{{item.add_date}}</uni-td>
+					<uni-td>名称</uni-td>
 					<uni-td>
-						<view class="name">{{item.name}}</view>
+						<view class="name">{{item.goods_brand}}</view>
 					</uni-td>
-					<uni-td>{{item.address}}</uni-td>
+					<uni-td>{{item.goods_pro_data}}</uni-td>
+					<uni-td>{{item.goods_alreadKilometer}}</uni-td>
+					<uni-td>
+						在售
+					</uni-td>
+					<uni-td>{{item.shop_name}}</uni-td>
+					<uni-td>
+						<view class="uni-thumb shop-picture shop-picture-column">
+							<image :src="item.goods_thumb" mode="aspectFill" @click.stop="prviewImage(item.goods_thumb)"></image>
+						</view>
+					</uni-td>
 					<uni-td>
 						<view class="uni-group">
 							<!-- 编辑按钮 -->
@@ -55,8 +71,10 @@
 
 
 <script>
+import tableData from './tableData'
+
 	// 导入名为 "tableData" 的模块，路径为 './tableData.js'
-	import tableData from './tableData.js'
+	//import tableData from './tableData.js'
 
 	// 导出默认模块
 	export default {
@@ -97,7 +115,18 @@
 			selectionChange(e) {
 				this.selectedIndexs = e.detail.index
 			},
-
+			navigateTo(url, clear) {
+				// clear 表示刷新列表时是否清除页码，true 表示刷新并回到列表第 1 页，默认为 true
+				uni.navigateTo({
+					url,
+					events: {
+						refreshData: () => {
+							this.loadTags()
+							this.loadData(clear)
+						}
+					}
+				})
+			},
 			// 批量删除函数
 			delTable() {
 				this.selectedItems();
@@ -111,6 +140,16 @@
 			// 搜索函数
 			search() {
 				this.getData(1, this.searchVal)
+			},
+			
+			prviewImage(img, index) {
+				let urls = []
+				urls.push(img)
+				console.log(urls) 
+				uni.previewImage({
+					urls: urls,
+					current: 0
+				});
 			},
 
 			// 获取数据函数
@@ -138,29 +177,41 @@
 					value
 				} = options
 
-				let total = tableData.length
+				uniCloud.callFunction({
+					name: 'getGoodsData'
+				}).then(res => {
+					if (res.result && !res.result.errorCode) {
+						
+							let total = res.result.length;	
+							let data = res.result.filter((item, index) => {
+								const idx = index - (pageCurrent - 1) * pageSize
+								return idx < pageSize && idx >= 0
+							})
+							
+							if (value) {
+								data = []
+								res.result.forEach(item => {
+									if (item.name.indexOf(value) !== -1) {
+										data.push(item)
+									}
+								})
+								total = data.length
+							}
 
-				let data = tableData.filter((item, index) => {
-					const idx = index - (pageCurrent - 1) * pageSize
-					return idx < pageSize && idx >= 0
-				})
-
-				if (value) {
-					data = []
-					tableData.forEach(item => {
-						if (item.name.indexOf(value) !== -1) {
-							data.push(item)
+ 							setTimeout(() => {
+								typeof success === 'function' && success({
+									data: data,
+									total: total
+								})
+							}, 500) 
+						} else {
+							console.error('获取数据失败：', res.result.errorMessage);
 						}
-					})
-					total = data.length
-				}
+				}).catch(err => {
+					console.error('调用云函数失败：', err);
+				});
 
-				setTimeout(() => {
-					typeof success === 'function' && success({
-						data: data,
-						total: total
-					})
-				}, 500)
+
 			}
 		}
 	}
