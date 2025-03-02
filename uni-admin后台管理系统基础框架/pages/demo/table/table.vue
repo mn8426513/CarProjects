@@ -12,7 +12,7 @@
 				<!-- 添加按钮 -->
 				<button class="uni-button" type="primary" size="mini" @click="navigateTo('./add')">{{$t('common.button.add')}}</button>
 				<!-- 批量删除按钮 -->
-				<button class="uni-button" type="warn" size="mini" @click="delTable">{{$t('common.button.batchDelete')}}</button>
+				<button class="uni-button" type="warn" size="mini" @click="batchDeleteTable">{{$t('common.button.batchDelete')}}</button>
 			</view>
 		</view>
 		<view class="uni-container">
@@ -33,7 +33,7 @@
 				<uni-tr v-for="(item ,index) in tableData" :key="index">
 					<!-- 表格数据列 -->
 					<uni-td>{{item.add_date}}</uni-td>
-					<uni-td>名称</uni-td>
+					<uni-td>{{item.goods_name}}</uni-td>
 					<uni-td>
 						<view class="name">{{item.goods_brand}}</view>
 					</uni-td>
@@ -104,15 +104,6 @@ import tableData from './tableData'
 
 		// 方法
 		methods: {
-			// 多选处理
-			selectedItems() {
-				return this.selectedIndexs.map(i => this.tableData[i])
-			},
-
-			// 多选事件处理函数
-			selectionChange(e) {
-				this.selectedIndexs = e.detail.index
-			},
 			navigateTo(url, clear) {
 				// clear 表示刷新列表时是否清除页码，true 表示刷新并回到列表第 1 页，默认为 true
 				uni.navigateTo({
@@ -125,28 +116,87 @@ import tableData from './tableData'
 					}
 				})
 			},
-			// 批量删除函数
-			delTable() {
-				this.selectedItems();
+			// 多选事件处理函数
+			selectionChange(e) {
+				this.selectedIndexs = e.detail.index
 			},
+			// 批量删除函数
+			batchDeleteTable() {
+				let selectedItems = this.selectedItems();
+				if (!selectedItems || !selectedItems.length) {
+					uni.showModal({
+						content: '请选择需要删除的车',
+						showCancel: false
+					})
+					return;
+				} else {
+					const selectedItemsIds = selectedItems.map(item => item._id)
+					uni.showModal({
+						title: '提示',
+						content: '确定要删除选中的数据吗？',
+						success: async (res) => {
+							if (res.confirm) {
+								this.deleteBatchGoodsData({
+									success: (res) => {
+										uni.showToast({
+											title: '删除成功'
+										})
+										this.tableData = this.tableData.filter(item => !selectedItemsIds.includes(item._id));
+									},
+									fail: (res) => {
+										uni.showToast({
+											title: res.result['message'] || '删除失败',
+											icon: 'error'
+										})
+									},
+									_ids: selectedItemsIds
+								})
+							}
+						}
+					})
+					
+
+					
+				}
+			},
+			// 多选处理
+			selectedItems() {
+				if (!this.selectedIndexs || !this.tableData) {
+					return []
+				} else {
+					return this.selectedIndexs.map(index => this.tableData[index]);
+				}
+			},
+			
+			// 单笔选中删除回调函数
 			deleteItem(_id) {
-				this.deleteGoodsData({
-					_id: _id,
-					success: (res) => {
-						uni.showToast({
-							title: '删除成功'
-						})
-					    this.tableData = this.tableData.filter(item => item._id !== _id);
-					},
-					fail: (res) => {
-						uni.showToast({
-							title: res.result['message'] || '删除失败',
-							icon: 'error'
-						})
+				uni.showModal({
+					title: '提示',
+					content: '确定要删除本条数据吗？',
+					success: async (res) => {
+						if (res.confirm) {
+							this.deleteGoodsData({
+								_id: _id,
+								success: (res) => {
+									uni.showToast({
+										title: '删除成功'
+									})
+									this.tableData = this.tableData.filter(item => item._id !== _id);
+								},
+								fail: (res) => {
+									uni.showToast({
+										title: res.result['message'] || '删除失败',
+										icon: 'error'
+									})
+								}
+							})
+						}
 					}
 				})
 			},
-			// 添加保存数据的方法
+			
+			
+			// 删除单笔数据记录的方法
 			async deleteGoodsData(options) {
 				const {
 					success,
@@ -189,6 +239,52 @@ import tableData from './tableData'
 					typeof fail === 'function' && fail(result)
 				}
 			},
+			
+			
+			
+			// 批量删除数据的方法
+			async deleteBatchGoodsData(options) {
+				const {
+					success,
+					fail,
+					_ids
+				} = options
+				try {
+					// 准备要保存的数据对象
+					const goodsData = {
+						_ids: options._ids
+					}
+					console.log(goodsData)
+			
+					// 调用云函数保存数据
+					const result = await uniCloud.callFunction({
+						name: 'deleteGoodsData',
+						data: {
+							action: 'deleteBatch',
+							tableName: 'opendb-mall-goods',
+							data: goodsData
+						}
+					})
+					console.log(result)
+					console.log(result.header["x-serverless-http-status"])
+					console.log(result.result["code"])
+					console.log(result["success"])
+					console.log(result.result["message"])
+				
+					if (result.success && !result.result["code"] && result.header["x-serverless-http-status"] == '200') {			
+						setTimeout(() => {
+							console.log('deleteBatch success')
+							success(result)
+							typeof success === 'function' && success(result)
+						}, 500) 
+			
+					} else {
+						typeof fail === 'function' && fail(result)
+					}
+				} catch (e) {
+					typeof fail === 'function' && fail(result)
+				}
+			},
 
 			// 分页触发事件处理函数
 			change(e) {
@@ -200,6 +296,7 @@ import tableData from './tableData'
 				this.getData(1, this.searchVal)
 			},
 			
+			// 图片方法预览功能
 			prviewImage(img, index) {
 				let urls = []
 				urls.push(img)
@@ -249,7 +346,7 @@ import tableData from './tableData'
 							if (value) {
 								data = []
 								res.result.forEach(item => {
-									if (item.name.indexOf(value) !== -1) {
+									if (item.goods_name.indexOf(value) !== -1) {
 										data.push(item)
 									}
 								})
