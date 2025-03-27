@@ -42,7 +42,7 @@ export default {
 		// 配置静态菜单列表（放置在用户被授权的菜单列表下边）
 		staticMenu: [{
 			menu_id: "demo",
-			text: '汽车上架下架',
+			text: '汽车维护',
 			icon: 'admin-icons-kaifashili',
 			url: "",
 			children: 
@@ -52,12 +52,20 @@ export default {
 					text: '汽车列表',
 					icon: 'admin-icons-table',
 					value: '/pages/demo/table/table',
-				}, {
+				},
+				{
+				menu_id: "icons",
+				text: '商铺维护',
+				icon: 'admin-icons-icon',
+				value: '/pages/demo/table/editShop',
+				}
+/* 				{
 				menu_id: "icons",
 				text: '图标',
 				icon: 'admin-icons-icon',
 				value: '/pages/demo/icons/icons',
-				}]
+				},*/
+				] 
 		}, {
 			menu_id: "admim-doc-pulgin",
 			text: '文档与插件',

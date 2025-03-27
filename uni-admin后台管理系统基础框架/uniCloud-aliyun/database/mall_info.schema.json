@@ -1,0 +1,25 @@
+{
+	"bsonType": "object",
+	"permission": {
+		"create": false,
+		"delete": false,
+		"read": "doc.is_on_sale == true",
+		"update": false
+	},
+	"properties": {
+		"_id": {
+			"description": "存储文档 ID（商品 ID），系统自动生成"
+		},
+		"mall_name": {
+			"bsonType": "string",
+			"description": "商铺名称",
+			"title": "商铺名称"
+		},
+		"imageFile_list": {
+			"title": "图片链接列表",
+			"bsonType": "string",
+			"description": "图片链接列表"
+		}
+	},
+	"required": ["mall_name", "imageFile_list"]
+}

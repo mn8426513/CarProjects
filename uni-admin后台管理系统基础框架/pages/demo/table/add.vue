@@ -13,7 +13,9 @@
 			<uni-forms-item name="is_best" label="是否精品" class="flex-center-x" required>
 				<switch @change="binddata('is_best', $event.detail.value)" :checked="formData.is_best" />
 			</uni-forms-item>
-
+			<uni-forms-item name="role" label="商品标签" class="flex-center-x">
+				<uni-data-checkbox multiple :localdata="goods_signatures" v-model="formData.goods_signatures" />
+			</uni-forms-item>
 			<uni-forms-item name="goods_paiLiang" label="车辆排量" required>
 				<uni-easyinput v-model="formData.goods_paiLiang" :clearable="false" placeholder="请输入车辆排量" />
 			</uni-forms-item>
@@ -32,6 +34,13 @@
 				<uni-datetime-picker type="date" v-model="formData.goods_pro_date" returnType="timestamp"
 					:clearIcon="false" class="uni-stat-datetime-picker"
 					:class="{'uni-stat__actived': !!formData.goods_pro_date}" />
+			</uni-forms-item>
+			
+			<uni-forms-item name="goods_saler" label="销售员" required>
+				<uni-easyinput v-model="userInfo.nickname" :clearable="false" disabled="true" placeholder="请输入销售员姓名" />
+			</uni-forms-item>
+			<uni-forms-item name="goods_saler_phone" label="手机号" required>
+				<uni-easyinput v-model="userInfo.mobile" :clearable="false" disabled="true" placeholder="请输入销售员手机号" />
 			</uni-forms-item>
 <!-- 			<uni-forms-item name="tags" label="用户标签" labelWidth="100" class="flex-center-x">
 				<uni-data-checkbox ref="checkbox" :multiple="true" v-model="formData.tags" collection="uni-id-tag"
@@ -91,13 +100,18 @@
 	} from '@/js_sdk/validator/uni-id-users.js';
 	
 	import {
+	  store,
+	  mutations
+	} from '@/uni_modules/uni-id-pages/common/store.js';
+	
+	import {
 		mapfields,
 		stringifyQuery,
 		getTimeOfSomeDayAgo,
 		division,
 		format,
 		debounce
-	} from '@/js_sdk/uni-stat/util.js'
+	} from '@/js_sdk/uni-stat/util.js';
 
 	const db = uniCloud.database();
 	const dbCmd = db.command;
@@ -114,20 +128,35 @@
 	}
 
 	export default {
+		computed: {
+		  userInfo() {
+		    return store.userInfo
+		  },
+		  realNameStatus () {
+			  if (!this.userInfo.realNameAuth) {
+				  return 0
+			  }
+		
+			  return this.userInfo.realNameAuth.authStatus
+		  }
+		},
 		data() {
 			return {
 				formData: {
 					"add_date": getTimeOfSomeDayAgo(0),
 					"goods_pro_date": getTimeOfSomeDayAgo(0),
-					"goods_alreadKilometer": "123",
-					"goods_name": "1212",
-					"goods_brand": "123",
+					"goods_alreadKilometer": "",
+					"goods_name": "",
+					"goods_brand": "",
 					"is_best": false,
-					"goods_brand": "123",
-					"goods_paiLiang": "123",
-					"goods_bianSuXiang": "123",
-					"goods_quDongFangShi": "123"
+					"goods_brand": "",
+					"goods_paiLiang": "",
+					"goods_bianSuXiang": "",
+					"goods_quDongFangShi": "",
+					"goods_signatures":[]
 				},
+				
+				goods_signatures:[],
 				imageFile_list: [],
 				
 				rules: {
@@ -165,6 +194,7 @@
 		},
 		onLoad() {
 			//this.loadroles()
+			this.loadSignatures();
 		},
 		methods: {
 			/**
@@ -190,6 +220,31 @@
 					}
 				})
 			},
+			
+			loadSignatures() {
+				db.collection('goods-signatures').limit(500).get().then(res => {
+					const signaturesIds = []
+					this.goods_signatures = res.result.data.map(item => {
+						signaturesIds.push(item.signature_id)
+						return {
+							value: item.signature_id,
+							text: item.signature_name
+						}
+					})
+					if (signaturesIds.indexOf('best') === -1) {
+						this.roles.unshift({
+							value: 'best',
+							text: '精品车'
+						})
+					}
+				}).catch(err => {
+					uni.showModal({
+						title: '查询商品标签错误',
+						content: err.message,
+						showCancel: false
+					})
+				})
+			},
 
 			/**
 			 * 触发表单提交
@@ -207,6 +262,7 @@
 					value,
 					errors
 				} = event.detail
+				
 				if (event.detail.value.goods_name==='') {
 					uni.showModal({
 						content: '车辆名称必填',
@@ -277,7 +333,22 @@
 					})
 					return;
 				}
-
+				if (this.userInfo.nickname === '') {
+					uni.showModal({
+						content: '销售员姓名必填',
+						showCancel: false
+					})
+					return;
+				}
+				
+				if (this.userInfo.mobile === '') {
+					uni.showModal({
+						content: '销售员手机号必填',
+						showCancel: false
+					})
+					return;
+				}
+				
 				// 表单校验失败页面会提示报错 ，要停止表单提交逻辑
 				if (errors) {
 					return
@@ -289,6 +360,7 @@
 				// 是否精品车的数据类型转换， 0 精品， 1 非精品
 				if (typeof value.is_best === "boolean") {
 					value.is_best = Number(!value.is_best)
+					this.formData.is_best = Number(!value.is_best)
 				}
 				
 				this.saveGoodsData({	
@@ -357,8 +429,33 @@
 						shop_name: this.formData.shop_name,
 						goods_thumb: this.imageFile_list[0]?.url || '',
 						create_date: Date.now(),
-						imageFile_list: JSON.stringify(this.imageFile_list)
-						
+						imageFile_list: JSON.stringify(this.imageFile_list),
+						category_id: '1',
+						comment_count: 10,
+						goods_banner_imgs:[],
+						goods_desc:"好车",
+						goods_price: "7.2",
+						goods_sn:"商品ID",
+						goods_paiLiang: this.formData.goods_paiLiang,
+						goods_bianSuXiang: this.formData.goods_bianSuXiang,
+						goods_quDongFangShi: this.formData.goods_quDongFangShi,
+						goods_tip: "精品车",
+						is_alone_sale: true,
+						is_best: this.formData.is_best,
+						is_hot: true,
+						is_new: true,
+						is_on_sale: true,
+						is_real: true,
+						keywords: "关键字好车",
+						last_modify_date:  Date.now(),
+						month_sell_count: 1,
+						remain_count: 1,
+						seller_note: "商家备注",
+						shop_name:"品域车行",
+						tag: this.formData.goods_signatures,
+						total_sell_count: 1,
+						saler_phone: this.userInfo.mobile,
+						saler_name: this.userInfo.nickname
 					}
 					console.log(goodsData)
 

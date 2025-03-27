@@ -1,0 +1,7 @@
+{
+  "name": "saveMallData",
+  "dependencies": {},
+  "extensions": {
+    "uni-cloud-jql": {}
+  }
+}

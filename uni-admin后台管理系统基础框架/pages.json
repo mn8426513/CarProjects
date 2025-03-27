@@ -12,7 +12,20 @@
 		{
 			"path": "pages/demo/table/table",
 			"style": {
-				"navigationBarTitleText": "表格"
+				"navigationBarTitleText": "汽车列表"
+			}
+		},
+		{
+			"path": "pages/demo/table/editShop",
+			"style": {
+				"navigationBarTitleText": "商铺维护"
+			}
+		},
+		{
+			"path": "pages/demo/table/add",
+			"style": {
+				"navigationBarTitleText": "新增车辆",
+				"navigationStyle": "default"
 			}
 		},
 		{
@@ -284,17 +297,34 @@
 				}
 			]
 		},
-		{
-			"root": "pages/demo",
-			"pages": [{
-					"path": "table/add",
-					"style": {
-						"navigationBarTitleText": "新增车辆",
-						"navigationStyle": "default"
-					}
-				}
-			]
-		},
+	//	{
+	//		"root": "pages/demo",
+		//	"pages": [	
+	/* 					{
+							"path": "table/table",
+							"style": {
+								"navigationBarTitleText": "车辆管理",
+								"navigationStyle": "default"
+							}
+						}, */
+				//		{
+				//			"path": "table/add",
+				//			"style": {
+					//			"navigationBarTitleText": "新增车辆",
+				//				"navigationStyle": "default"
+					//		}
+					//	}
+/* 						,
+						{
+							"path": "table/editShop",
+							"style": {
+								"navigationBarTitleText": "编辑店铺",
+								"navigationStyle": "default"
+							}
+						} */
+					//]
+		//},
+		
 		{
 			"root": "pages/uni-stat",
 			"pages": [{

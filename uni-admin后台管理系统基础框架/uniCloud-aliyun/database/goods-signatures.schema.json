@@ -1,0 +1,29 @@
+{
+	"bsonType": "object",
+	"required": ["signature_id", "signature_name"],
+	"properties": {
+		"_id": {
+			"description": "存储文档 ID，系统自动生成"
+		},
+		"create_date": {
+			"bsonType": "timestamp",
+			"description": "创建时间",
+			"forceDefaultValue": {
+				"$env": "now"
+			}
+		},
+
+		"signature_id": {
+			"title": "唯一ID",
+			"bsonType": "string",
+			"description": "标签唯一标识，不可修改，不允许重复",
+			"trim": "both"
+		},
+		"signature_name": {
+			"title": "名称",
+			"bsonType": "string",
+			"description": "标签名称",
+			"trim": "both"
+		}
+	}
+}

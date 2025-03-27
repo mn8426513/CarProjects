@@ -1,0 +1,1 @@
+"use strict";const r=require("../../common/vendor.js"),e=require("../../admin.config.js");exports.initInterceptor=function(){r.index.addInterceptor("navigateTo",{fail:({errMsg:n})=>{-1!==n.indexOf("is not found")&&r.index.navigateTo({url:e.config.error.url+"?errMsg="+n})}})};

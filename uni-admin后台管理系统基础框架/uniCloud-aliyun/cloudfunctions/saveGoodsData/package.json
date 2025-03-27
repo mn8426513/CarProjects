@@ -1,5 +1,5 @@
 {
-  "name": "saveGoodsData",
+  "name": "saveShopData",
   "dependencies": {},
   "extensions": {
     "uni-cloud-jql": {}

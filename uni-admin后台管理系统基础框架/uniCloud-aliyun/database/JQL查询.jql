@@ -10,3 +10,4 @@
 
 // 下面示例查询uni-id-users表的所有数据
 db.collection('uni-id-users').get();
+db.collection('opendb-mall-goods').get().;

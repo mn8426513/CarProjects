@@ -1,0 +1,6 @@
+[
+  {"signature_id": "best", "signature_name": "精品车","create_date": 0},
+  {"signature_id": "lastest", "signature_name": "最新上架","create_date": 0},
+  {"signature_id": "cheapest", "signature_name": "优惠车","create_date": 0},
+  {"signature_id": "mostPopular", "signature_name": "最新上架","create_date": 0}
+]

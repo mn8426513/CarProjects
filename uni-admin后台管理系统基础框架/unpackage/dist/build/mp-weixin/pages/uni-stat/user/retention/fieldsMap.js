@@ -1,0 +1,1 @@
+"use strict";exports.fieldsFactory=function(t=[{title:"新增用户",field:"new_user_count",stat:0}]){let e=[{title:"日期",field:"start_time",tooltip:"",formatter:"-",stat:-1}];t&&e.push(...t);const i=[1,2,3,4,5,6,7,14,30].map((e=>({title:`${e}天后`,field:`d_${e}`,computed:`d_${e}/${t[0].field}`,formatter:"%",tooltip:""})));return e=e.concat(i),e};

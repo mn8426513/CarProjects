@@ -1,0 +1,1 @@
+"use strict";const r=require("../../common/vendor.js"),e={data:()=>({}),onLoad(r){this.errMsg=r.errMsg||""},methods:{}};if(!Array){r.resolveComponent("fix-window")()}Math;const o=r._export_sfc(e,[["render",function(e,o,t,n,s,a){return{a:r.t(e.errMsg)}}]]);wx.createPage(o);

@@ -90,8 +90,9 @@
 			"description": "是否能单独销售；如果不能单独销售，则只能作为某商品的配件或者赠品销售"
 		},
 		"is_best": {
-			"bsonType": "bool",
-			"description": "是否精品"
+			"bsonType": "int",
+			"description": "是否精品车",
+			"title": "是否精品车"
 		},
 		"is_hot": {
 			"bsonType": "bool",
@@ -137,6 +138,16 @@
 			"bsonType": "int",
 			"description": "库存数量",
 			"title": "库存数量"
+		},
+		"saler_name": {
+			"bsonType": "string",
+			"description": "销售人员姓名",
+			"title": "销售人员姓名"
+		},
+		"saler_phone": {
+			"bsonType": "string",
+			"description": "销售人员电话",
+			"title": "销售人员电话"
 		},
 		"seller_note": {
 			"bsonType": "string",
